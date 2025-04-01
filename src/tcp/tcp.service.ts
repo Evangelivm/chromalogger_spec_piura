@@ -47,16 +47,33 @@ export class TcpService implements OnModuleInit, OnModuleDestroy {
       socket.on('data', async (data) => {
         try {
           const receivedData = data.toString();
+
+          // Process the data - this now handles multiple data groups
           const processedData = this.dataService.processData(receivedData);
-          const serializedData = JSON.stringify(processedData);
 
-          await this.queueService.enqueueData(
-            [serializedData],
-            config.projectName,
-          );
+          // Only proceed if we have data to process (non-empty dataGroup)
+          if (processedData.dataGroup && processedData.dataGroup.length > 0) {
+            const serializedData = JSON.stringify(processedData);
 
-          const xmlData = processedData.dataGroup[0]['data'];
-          this.broadcastData(xmlData, socket, config.projectName);
+            // Enqueue the processed data
+            await this.queueService.enqueueData(
+              [serializedData],
+              config.projectName,
+            );
+
+            // Extract XML data for broadcasting
+            const xmlData = processedData.dataGroup[0]['data'];
+
+            // Broadcast to other clients
+            this.broadcastData(xmlData, socket, config.projectName);
+
+            console.log(
+              `Processed data for ${config.projectName}: ${processedData.dataGroup.length} records`,
+            );
+          } else {
+            // Log that we're still collecting data groups
+            console.log(`Collection of data sets for ${config.projectName}...`);
+          }
         } catch (error) {
           console.error(`Error en ${config.projectName}:`, error.message);
         }

@@ -6,61 +6,82 @@ import { create } from 'xmlbuilder2';
 @Injectable()
 export class DataService {
   private previousData = {};
-  private buffer: string = '';
-  private inProgress: boolean = false;
+  private dataBuffer = '';
+  private isCollectingGroups = false;
+  private groupCount = 0;
 
   constructor(private websocketGateway: WebsocketGateway) {}
 
   private codeMap = codeMap;
 
   processData(data: string) {
-    // Si el dato comienza con &&, iniciamos un nuevo buffer
-    if (data.startsWith('&&')) {
-      this.buffer = '';
-      this.inProgress = true;
+    // Check if we're already collecting groups or if this is a new group
+    if (!this.isCollectingGroups && data.trim().startsWith('&&')) {
+      this.isCollectingGroups = true;
+      this.dataBuffer = '';
+      this.groupCount = 0;
     }
 
-    // Agregamos el dato al buffer si estamos en medio de un grupo
-    if (this.inProgress) {
-      this.buffer += data + '\n';
-    }
+    if (this.isCollectingGroups) {
+      // Add the current data to our buffer
+      this.dataBuffer += data;
 
-    // Si el dato termina con !!, finalizamos el grupo
-    if (data.endsWith('!!')) {
-      this.inProgress = false;
-      return this.processCompleteData(this.buffer);
-    }
+      // Count the number of groups in this batch
+      const matches = data.match(/&&/g);
+      if (matches) {
+        this.groupCount += matches.length;
+      }
 
-    // Si no es un grupo completo, no hacemos nada aún
-    return null;
+      // Check if we've reached the end of a group
+      const endMatches = data.match(/!!/g);
+      if (endMatches) {
+        // Reduce the group count by the number of end markers
+        this.groupCount -= endMatches.length;
+      }
+
+      // If we've collected all groups (all have been closed), process the combined data
+      if (this.groupCount <= 0 && this.dataBuffer.trim().endsWith('!!')) {
+        const combinedData = this.dataBuffer;
+        this.isCollectingGroups = false;
+        this.dataBuffer = '';
+
+        // Process the combined data
+        return this.processDataInternal(combinedData);
+      }
+
+      // Still collecting groups, return empty result for now
+      return { dataGroup: [] };
+    } else {
+      // Process data normally if it's not part of a group structure
+      return this.processDataInternal(data);
+    }
   }
 
-  private processCompleteData(data: string) {
-    // Limpiamos el buffer y combinamos todas las líneas
-    const combinedData = this.buffer
-      .split('\n')
-      .filter(
-        (line) =>
-          !line.startsWith('&&') &&
-          !line.endsWith('!!') &&
-          line.trim().length > 0,
-      )
-      .join('\n');
-
-    this.buffer = ''; // Limpiamos el buffer para el próximo grupo
-
+  private processDataInternal(data: string) {
     const result = {};
 
-    // Inicializar todas las variables en null para este bloque de datos
+    // Inicializar todas las variables en "0" en lugar de null para este bloque de datos
     Object.keys(this.codeMap).forEach((code) => {
-      result[this.codeMap[code].db_name] = null;
+      result[this.codeMap[code].db_name] = '0';
     });
 
-    // Procesar el string combinado
-    const lines = combinedData
-      .split('\n')
-      .filter((line) => line.trim().length > 0);
-    for (const line of lines) {
+    // Extract all lines from all groups
+    const allLines = [];
+    const groups = data.split('&&');
+
+    for (let group of groups) {
+      if (group.trim() === '') continue;
+
+      // Remove the ending !! if present
+      group = group.replace('!!', '');
+
+      // Get lines from this group
+      const lines = group.split('\n').filter((line) => line.trim().length > 0);
+      allLines.push(...lines);
+    }
+
+    // Process all lines from all groups
+    for (const line of allLines) {
       const code = line.slice(0, 4);
       const value = line.slice(4).trim();
 
@@ -82,8 +103,8 @@ export class DataService {
 
     // Asegurar que siempre se envíen todos los valores retenidos desde previousData
     Object.keys(this.previousData).forEach((key) => {
-      if (result[key] === null) {
-        result[key] = this.previousData[key];
+      if (result[key] === '0') {
+        result[key] = this.previousData[key] || '0';
       }
     });
 
@@ -110,7 +131,7 @@ export class DataService {
       if (db_name !== 'time' && db_name !== 'data') {
         xml
           .ele(wits_name, { uom: 'm' })
-          .txt(result[db_name] || '')
+          .txt(result[db_name] || '0')
           .up();
       }
     });
@@ -130,7 +151,7 @@ export class DataService {
 
     const dataGroup = {
       dataGroup: [result],
-      raw: combinedData, // Agregar los datos crudos combinados al objeto
+      raw: data, // Agregar los datos crudos al objeto
     };
 
     // Emitir datos a través del WebSocket

@@ -15,7 +15,13 @@ COPY prisma ./prisma/
 
 # Copia los scripts de inicialización y dale permisos de ejecución
 COPY init.sh generate-prisma-schema.sh ./
-RUN chmod +x init.sh generate-prisma-schema.sh
+RUN chmod +x generate-prisma-schema.sh
+RUN chmod +x init.sh
+
+# Copia el resto de los archivos del proyecto
+COPY . .
+
+# Ahora que tienes todos los archivos, ejecuta el script
 RUN ./generate-prisma-schema.sh
 
 # Limpia la caché de npm para evitar problemas anteriores
@@ -26,9 +32,6 @@ RUN npm install
 
 # Genera el cliente de Prisma
 RUN npx prisma generate
-
-# Copia el resto de los archivos del proyecto
-COPY . .
 
 # Compila el código TypeScript
 RUN npm run build
