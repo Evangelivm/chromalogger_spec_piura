@@ -104,7 +104,7 @@ docker-compose up
 Actualizacion 28/03/2025: Ahora ejecuta el proyecto solo con estos comandos, usando los archivos connections.config.ts y code-map.ts se creara los puertos del docker compose, se creara el modelo con las tablas a partir de los parametros y conexiones indicadas en estos archivos y se ejecutara, esto solo se debe hacer en la primera vez:
 
 ```bash
-chmod +x compose-up.sh
+chmod +x generate-prisma-schema.sh init.sh compose-up.sh
 ./compose-up.sh
 ```
 
