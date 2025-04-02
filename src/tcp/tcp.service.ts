@@ -73,6 +73,7 @@ export class TcpService implements OnModuleInit, OnModuleDestroy {
       socket.on('data', async (data) => {
         try {
           const receivedData = data.toString();
+          //console.log(receivedData);
           console.log(
             `Datos recibidos de ${config.projectName} (${data.length} bytes)`,
           );
@@ -100,11 +101,11 @@ export class TcpService implements OnModuleInit, OnModuleDestroy {
               config.projectName,
             );
 
-            // Extract XML data for broadcasting
+            // Extract WITSML for broadcasting
             const xmlData = processedData.dataGroup[0]['data'];
 
             // Broadcast to other clients
-            this.broadcastData(xmlData, socket, config.projectName);
+            this.broadcastData(receivedData, socket, config.projectName);
 
             console.log(
               `Processed data for ${config.projectName}: ${processedData.dataGroup.length} records`,

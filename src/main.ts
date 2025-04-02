@@ -9,8 +9,8 @@ async function bootstrap() {
 
   app.enableCors(); // Habilita CORS si es necesario
 
-  await app.listen(3000);
-  console.log('Aplicación en ejecución en http://localhost:3000');
+  await app.listen(3000, '0.0.0.0');
+  console.log('Hola:Aplicación en ejecución en http://localhost:3000');
 }
 
 bootstrap();
