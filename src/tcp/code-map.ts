@@ -331,7 +331,7 @@ export const codeMap = {
     unit: 'strokes',
   },
   '0137': {
-    db_name: 'TOTAL_STROKES',
+    db_name: 'TOTAL_STK',
     wits_name: 'Total_Strokes',
     unit: 'strokes',
   },
@@ -345,19 +345,19 @@ export const codeMap = {
   '1214': { db_name: 'PROPANE_C3', wits_name: 'Propane_C3', unit: 'ppm' },
   '1215': { db_name: 'ISOBUTANE_C4I', wits_name: 'Isobutane_C4I', unit: 'ppm' },
   '1216': {
-    db_name: 'NOR_BUTANE_C4N',
+    db_name: 'NOR_BUT_C4N',
     wits_name: 'Nor_Butane_C4N',
     unit: 'ppm',
   },
   '1218': { db_name: 'NOR_PENTANE', wits_name: 'Nor_Pentane', unit: 'ppm' },
   '1217': {
-    db_name: 'ISO_PENTANE_C5I',
+    db_name: 'ISO_PENT_C5I',
     wits_name: 'Iso_Pentane_C5I',
     unit: 'ppm',
   },
   '1424': { db_name: 'H2S', wits_name: 'H2S', unit: 'ppm' },
   '1222': {
-    db_name: 'CARBON_DIOXIDE',
+    db_name: 'CARB_DIOX',
     wits_name: 'Carbon_Dioxide',
     unit: 'ppm',
   },
@@ -365,7 +365,7 @@ export const codeMap = {
   // Tiempos y otros
   '0173': { db_name: 'LAG_TIME', wits_name: 'Lag_Time', unit: 'min' },
   '0127': { db_name: 'GAIN_LOSS', wits_name: 'Gain_Loss', unit: 'm³' },
-  '0175': { db_name: 'UNKNOWN_2', wits_name: 'Unknown_2', unit: 'm' },
-  '0160': { db_name: 'UNKNOWN_3', wits_name: 'Unknown_3', unit: 'm' },
-  '1208': { db_name: 'UNKNOWN_1', wits_name: 'Unknown_1', unit: 'm' },
+  '0175': { db_name: 'UNKN_2', wits_name: 'Unknown_2', unit: 'm' },
+  '0160': { db_name: 'UNKN_3', wits_name: 'Unknown_3', unit: 'm' },
+  '1208': { db_name: 'UNKN_1', wits_name: 'Unknown_1', unit: 'm' },
 };
